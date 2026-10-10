@@ -304,6 +304,76 @@
       "bytes": 144
     },
     {
+      "file": "companion-agent/src/user-model/probe/day-keys.ts",
+      "sha256": "c15ee0ad1edc0bbb592250a47b23512dd6b4970eb9e60eea986532deaed13e2e",
+      "bytes": 2709
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/dedup.ts",
+      "sha256": "320071fa2b9b3a97fb665adbcbeaa606619979afe40de930401ceaaf587924df",
+      "bytes": 4104
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/facet-rules.ts",
+      "sha256": "3cc9cb7b4a8235719231fc0741145a3694f5d0bfdab746b38cb81e2d7a72c3a0",
+      "bytes": 17081
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/facets.ts",
+      "sha256": "5dcfe63bb4eafe4f92d60f021b5984501412fefe19f2d9c171b9a155f9bc407a",
+      "bytes": 3565
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/guards.ts",
+      "sha256": "16eda742bdd89e47ab647412e8513e08ab097074d4f190aca326ae8298c4a3eb",
+      "bytes": 4910
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/itembank.ts",
+      "sha256": "b434720fcd6f96bbe3cc909cdd1eebe258dc954efb412de931e380a3c78420d9",
+      "bytes": 227
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/planner.ts",
+      "sha256": "d775650bdd8b8ec3e792af363dc4518e21aaf2111becf567cd810629650c9897",
+      "bytes": 9398
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/README.md",
+      "sha256": "550cbb35cf51fc9dea2940c75202168c2f1201698af03afa44d852113b911b05",
+      "bytes": 783
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/registry.ts",
+      "sha256": "b2d908ea61a013be51006b8d69ecde103542475d07165c2afd506fed7eaaee48",
+      "bytes": 12848
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/schedule.ts",
+      "sha256": "fc33053f28bd4fe8498ba42c0aad3c94877d792c55ed6625db656dfac69b6d58",
+      "bytes": 11058
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/select-facets.ts",
+      "sha256": "505b3aa7e4c00461a43e26f41d3ac176d16588ee1ece8c1004f0ce6bad8c32fe",
+      "bytes": 18746
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/selector.ts",
+      "sha256": "eb6e725fbeeb98c30dd63c81a7749dc3fffdb50b3f82f8e7c0d03c6de6e9d6f9",
+      "bytes": 953
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/types.ts",
+      "sha256": "7381423b85f1c84acc10134cb3c5725734af3459d2a0e1a71004ec9170016b98",
+      "bytes": 6531
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/util.ts",
+      "sha256": "fa4b794efedc2452b9b10b697f846e38fbb38afc0f645b6cfe0c4ee31f3a0251",
+      "bytes": 14145
+    },
+    {
       "file": "companion-agent/src/user-model/schema.ts",
       "sha256": "ce7a4c3506a73020ad2dd6382a621aeafefcf6b0703be3d34f52b2b179096918",
       "bytes": 9310
@@ -605,8 +675,8 @@
     },
     {
       "file": "shared/src/memory/recall-details.ts",
-      "sha256": "dcf91175c77f7abcf66934d2b9d0abb3e100c48f9688f785b73195dcc8702e4a",
-      "bytes": 38361
+      "sha256": "987bd3ecdc71f0c7873001940243e82accc878d4c17602b24d837ddedafd16b0",
+      "bytes": 37152
     },
     {
       "file": "shared/src/memory/relevance.ts",
@@ -620,8 +690,8 @@
     },
     {
       "file": "shared/src/memory/retention.ts",
-      "sha256": "8206e70685b79b015c860ac3f195abc460173bc29b6fc9b7119938955be49b32",
-      "bytes": 34496
+      "sha256": "dd75e6479d8e9dd31226e76213dc7a72f8f747ca305c273e0306c91c1205f261",
+      "bytes": 38829
     },
     {
       "file": "shared/src/memory/retrieval.ts",
