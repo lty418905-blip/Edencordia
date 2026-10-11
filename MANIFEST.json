@@ -200,8 +200,8 @@
     },
     {
       "file": "companion-agent/src/companion/identity-expression.ts",
-      "sha256": "7178d5a6b140d61beca12f86c89061b30f5201eaea502c7f9e5aa49d16437838",
-      "bytes": 4861
+      "sha256": "9f1ab33ee4439081c592bad0f8821d9220e8219ccf5e6a142389f77bf3c1da6a",
+      "bytes": 8014
     },
     {
       "file": "companion-agent/src/companion/idle-learning.ts",
@@ -320,8 +320,8 @@
     },
     {
       "file": "companion-agent/src/user-model/probe/facets.ts",
-      "sha256": "5dcfe63bb4eafe4f92d60f021b5984501412fefe19f2d9c171b9a155f9bc407a",
-      "bytes": 3565
+      "sha256": "5bb0f864a0c8bfcba0af5d9f42204ba9b162ec1a520a37ceca2a789b2f4150d0",
+      "bytes": 5837
     },
     {
       "file": "companion-agent/src/user-model/probe/guards.ts",
@@ -334,14 +334,19 @@
       "bytes": 227
     },
     {
+      "file": "companion-agent/src/user-model/probe/owner-disclosure.ts",
+      "sha256": "50d46d0d0fa70b116ff70722329e25580d8ac1c6bf99df865754e6af7d1d6d53",
+      "bytes": 4340
+    },
+    {
       "file": "companion-agent/src/user-model/probe/planner.ts",
       "sha256": "d775650bdd8b8ec3e792af363dc4518e21aaf2111becf567cd810629650c9897",
       "bytes": 9398
     },
     {
       "file": "companion-agent/src/user-model/probe/README.md",
-      "sha256": "550cbb35cf51fc9dea2940c75202168c2f1201698af03afa44d852113b911b05",
-      "bytes": 783
+      "sha256": "b4d8b5d06264bb446474d8505dfe72b1f6f5cdef193625f6fccb8f40a498e089",
+      "bytes": 2180
     },
     {
       "file": "companion-agent/src/user-model/probe/registry.ts",
@@ -355,8 +360,8 @@
     },
     {
       "file": "companion-agent/src/user-model/probe/select-facets.ts",
-      "sha256": "505b3aa7e4c00461a43e26f41d3ac176d16588ee1ece8c1004f0ce6bad8c32fe",
-      "bytes": 18746
+      "sha256": "c4f410d9fbc5f01c90179a398fca33e201ca35202fe992927a342dcb06730091",
+      "bytes": 18956
     },
     {
       "file": "companion-agent/src/user-model/probe/selector.ts",

@@ -8,6 +8,30 @@ export function asksCompanionIdentity(currentUserText:string):boolean {
     || /\b(?:what\s+are\s+you|tell\s+me\s+(?:honestly\s+)?what\s+you\s+are)\s*[?？]/i.test(input);
 }
 
+/**
+ * OWNER SLOT - identity disclosure: how she answers (身份披露如何回覆, 由產品擁有者撰寫).
+ *
+ * This is the place that decides what the companion is told about disclosing what she is. It returns one of two
+ * instructions; the callers put the returned text into the prompt of the generating model (the scene service
+ * assembles the reply prompt; the companion flow, the scene extension and the agent runtime pass the text on):
+ *   - when the current user text asks directly what she is (asksCompanionIdentity above is true): the first
+ *     string, which is the wording of her answer to a direct question;
+ *   - in every other case, and when there is no current user text (null): the second string, which is what she
+ *     does about her identity when nobody asked.
+ *
+ * The product owner asked on 2026-10-10 that this part be marked so that the owner can write it later, and that
+ * nothing be written into it in the meantime. Nothing was written: the two strings below are the wording this
+ * file already had (unchanged since commit c1432fe), kept only so that behaviour does not change before the owner
+ * decides; they are the text to replace.
+ *
+ *   Owner's wording, direct question:  (blank - to be written by the owner)
+ *   Owner's wording, nobody asked:     (blank - to be written by the owner)
+ *
+ * The same decision appears in three more places of this file, which have to change together with it:
+ * asksCompanionIdentity above (what counts as a direct question), companionIdentityIssue (what counts as a
+ * wrong answer) and ensureCompanionIdentityBody (the instruction given to the rewrite). The test file
+ * companion-agent/tests/companion-identity-expression.test.mjs pins the present wording and has to follow.
+ */
 export function companionIdentityGuidance(currentUserText:string|null):string {
   const direct=currentUserText!==null&&asksCompanionIdentity(currentUserText);
   return direct
@@ -17,6 +41,19 @@ export function companionIdentityGuidance(currentUserText:string|null):string {
 
 export type IdentityIssue='false_identity'|'unsolicited_identity'|'missing_direct_answer'|null;
 
+/**
+ * OWNER SLOT (enforcement) - identity disclosure, see companionIdentityGuidance.
+ *
+ * Decides which reply counts as a wrong answer about her identity. It encodes the same policy as the wording in
+ * companionIdentityGuidance: a claim to be human, a denial of being an AI or a claim to have a real body is
+ * 'false_identity'; a statement of what she is when the current user text did not ask is 'unsolicited_identity';
+ * no such statement when it did ask is 'missing_direct_answer'. Left as it was; when the owner writes the wording,
+ * these three rules are what has to be brought into line with it.
+ *
+ * What follows from a wrong answer: on the reply path the model is asked once to revise, and when the revision is
+ * still wrong the turn fails; where a finished text is accepted (the native accept of the tavern, her proactive
+ * messages) it is refused without a revision.
+ */
 export function companionIdentityIssue(body:string,currentUserText:string|null):IdentityIssue {
   const prose=withoutQuotations(body);
   const falseIdentity=/(?:我|咱|俺|本人)\s*(?:(?:其实|真的|就是|完全|并|根本)\s*)?(?:是|就是|确实是)\s*(?:一(?:个|名)?\s*)?(?:真人|人类|真实的人|真正的人|活生生的人)|(?:我|咱|俺|本人)\s*(?:(?:其实|真的|就是|并|根本)\s*)?(?:不是|并非|绝不是)\s*(?:一(?:个|名)?\s*)?(?:ai|人工智能|机器人|bot|聊天机器人)|(?:我|咱|俺|本人)\s*有\s*(?:真实|真正)的?\s*身体|(?:我|咱|俺|本人)\s*(?:是|就是)\s*(?:一?个)?人(?=[\s，。！？,.!?]|$)/i.test(prose)
@@ -31,6 +68,15 @@ export function companionIdentityIssue(body:string,currentUserText:string|null):
   return null;
 }
 
+/**
+ * OWNER SLOT (rewrite) - identity disclosure, see companionIdentityGuidance.
+ *
+ * When a reply breaks the rules of companionIdentityIssue, the model is asked once to revise it. The instruction
+ * built below states the disclosure policy a second time (one sentence for a direct question, one for the other
+ * case, one that applies to both). Left as it was; it is the second text the owner replaces.
+ *
+ *   Owner's wording for the rewrite instruction:  (blank - to be written by the owner)
+ */
 export async function ensureCompanionIdentityBody(body:string,currentUserText:string|null,
   rewrite:(instruction:string,original:string)=>Promise<string>):Promise<string> {
   const issue=companionIdentityIssue(body,currentUserText);

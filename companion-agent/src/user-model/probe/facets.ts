@@ -27,26 +27,56 @@ export interface FacetView {
   declined?: boolean | null;
 }
 
-/** Situations the caller may report for the current turn. */
+/** Situations the caller may report for the current turn; in any of them no probe is proposed for any facet:
+ * the day of an argument, the user wants to be alone, deep night, right after a short answer. They stop
+ * only the proposing of probes; they are never a signal to stop passive collection: what the user says
+ * is still recorded by the caller and still enters the profile, marked with the situation. */
 export const UNIVERSAL_SITUATIONS = Object.freeze([
   'same_day_conflict', 'user_wants_alone', 'deep_night', 'after_short_answer',
 ] as const);
 export type UniversalSituation = (typeof UNIVERSAL_SITUATIONS)[number];
 
-/** Forbids a registry row may declare, reported by the caller as active situations. */
+/** Forbids a registry row may declare, reported by the caller as active situations: the user is
+ * ruminating; the user is in a rush. Neither a non-negative emotion of the user nor her own recent
+ * behaviour is a forbid (product owner, 2026-10-10): see ADVISORY_SITUATIONS. */
 export const ROW_FORBIDS = Object.freeze([
-  'rumination', 'user_in_rush', 'user_just_expressed_missing',
-  'after_her_long_message', 'after_her_self_disclosure', 'after_her_gap',
+  'rumination',
+  'user_in_rush',
 ] as const);
 export type RowForbid = (typeof ROW_FORBIDS)[number];
 
-export type Situation = UniversalSituation | RowForbid;
+/** Situations a caller may report that never close a gate and that a registry row cannot declare
+ * as forbids: the user has just said that he misses her, she has just written a long message, she has
+ * just disclosed something about herself, she has just been silent for a while. People do ask each
+ * other what they think at such moments. They are reported so that the step that words a question can
+ * make it follow from the conversation instead of reading like a questionnaire. */
+export const ADVISORY_SITUATIONS = Object.freeze([
+  'user_just_expressed_missing',
+  'after_her_long_message',
+  'after_her_self_disclosure',
+  'after_her_gap',
+] as const);
+export type AdvisorySituation = (typeof ADVISORY_SITUATIONS)[number];
 
+export type Situation = UniversalSituation | RowForbid | AdvisorySituation;
+
+/** The gates the caller supplies with each planning call; they decide whether a probe
+ * may be PROPOSED now. Apart from learningEnabled, none of them stops passive
+ * collection. */
 export interface PlanGates {
+  /** The consent switch of the user, set only on the backend page of the workspace (nothing said in a
+   * conversation changes it); false stops everything: nothing proposed, collecting and evaluation stop,
+   * waiting dropped. While it is true, passive collection and evaluation never stop. */
   learningEnabled: boolean;
+  /** True while the user is in distress, meaning a negative emotional state (for example grief, fear,
+   * anger, pain), and for the 24 hours after: no probes; collection continues, marked with the
+   * situation. A non-negative emotion, such as affection, joy or missing her, never sets it. */
   distressWindow: boolean;
+  /** The situations that hold now; see UNIVERSAL_SITUATIONS, ROW_FORBIDS and ADVISORY_SITUATIONS. */
   situations: Situation[];
+  /** Facts about the relationship that prerequisites of a registry row may require. */
   relationship: { daysAcquainted: number | null; relationalLanguageSeen: boolean | null };
+  /** The weekly ceiling for probes about facets under review; null when no research probe may be proposed. */
   research: { perFacetMinGapDays: number; perWeekTotal: number; probesThisWeek: number } | null;
 }
 

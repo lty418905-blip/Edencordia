@@ -7,6 +7,7 @@ import {snapshotCore,limitsFor,newWork,reasonOf, type ProbeWork} from './util.ts
  */
 
 import {
+  ADVISORY_SITUATIONS,
   CONTENT_FAMILIES,
   FACET_GROUPS,
   ROW_FORBIDS,
@@ -90,9 +91,14 @@ interface Validated {
 
 
 
+/** True for every situation name a caller may report: universal, a row forbid, or advisory (which closes nothing). */
 function isSituation(value: unknown): boolean {
   return typeof value === 'string'
-    && (containsName(UNIVERSAL_SITUATIONS, value) || containsName(ROW_FORBIDS, value));
+    && (
+      containsName(UNIVERSAL_SITUATIONS, value)
+      || containsName(ROW_FORBIDS, value)
+      || containsName(ADVISORY_SITUATIONS, value)
+    );
 }
 
 function isUniversalSituation(value: string): boolean {
