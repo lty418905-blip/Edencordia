@@ -305,8 +305,8 @@
     },
     {
       "file": "companion-agent/src/user-model/probe/day-keys.ts",
-      "sha256": "c15ee0ad1edc0bbb592250a47b23512dd6b4970eb9e60eea986532deaed13e2e",
-      "bytes": 2709
+      "sha256": "837787b9e9d4c93a3023609b85218877aec133e3120cf9c0d2f751f248857a2e",
+      "bytes": 5860
     },
     {
       "file": "companion-agent/src/user-model/probe/dedup.ts",
@@ -315,13 +315,28 @@
     },
     {
       "file": "companion-agent/src/user-model/probe/facet-rules.ts",
-      "sha256": "3cc9cb7b4a8235719231fc0741145a3694f5d0bfdab746b38cb81e2d7a72c3a0",
-      "bytes": 17081
+      "sha256": "b249a916012aa41179f410d1796a0830630350f6754a7f4db8ec04a54589ceda",
+      "bytes": 18327
     },
     {
       "file": "companion-agent/src/user-model/probe/facets.ts",
       "sha256": "5bb0f864a0c8bfcba0af5d9f42204ba9b162ec1a520a37ceca2a789b2f4150d0",
       "bytes": 5837
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/flow-gates.ts",
+      "sha256": "5c554fc25520268548910339d2bf988d0f3f98653398f2d96e294bb0f103cc76",
+      "bytes": 20825
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/flow-input.ts",
+      "sha256": "25a8d6b2bd1aba4dbc4cc3a65ebc44281d4f003907c01bf314a911ee4433a757",
+      "bytes": 17692
+    },
+    {
+      "file": "companion-agent/src/user-model/probe/flow.ts",
+      "sha256": "ba9f41e2f763b91fadb858424b66a9dbafb3ed4a6ea47c2172634a059a7740f0",
+      "bytes": 40041
     },
     {
       "file": "companion-agent/src/user-model/probe/guards.ts",
@@ -340,28 +355,28 @@
     },
     {
       "file": "companion-agent/src/user-model/probe/planner.ts",
-      "sha256": "d775650bdd8b8ec3e792af363dc4518e21aaf2111becf567cd810629650c9897",
-      "bytes": 9398
+      "sha256": "b94b9805d4ac56ef08eedc685390bc33a96b88b479392b4544282eb05b232c6f",
+      "bytes": 10104
     },
     {
       "file": "companion-agent/src/user-model/probe/README.md",
-      "sha256": "b4d8b5d06264bb446474d8505dfe72b1f6f5cdef193625f6fccb8f40a498e089",
-      "bytes": 2180
+      "sha256": "7ad608d5dd72e6818881516409d54f202014f6f64efa7dc3b00eb348b0d8aa04",
+      "bytes": 6870
     },
     {
       "file": "companion-agent/src/user-model/probe/registry.ts",
-      "sha256": "b2d908ea61a013be51006b8d69ecde103542475d07165c2afd506fed7eaaee48",
-      "bytes": 12848
+      "sha256": "69345fa12d0ff82853e7d0fd9cf7158d6dcbb6cf09b06cb36d286ef52b3ef288",
+      "bytes": 13231
     },
     {
       "file": "companion-agent/src/user-model/probe/schedule.ts",
-      "sha256": "fc33053f28bd4fe8498ba42c0aad3c94877d792c55ed6625db656dfac69b6d58",
-      "bytes": 11058
+      "sha256": "39707d741a2c50e29c73cb6fe91e6c4f32037b3daa2b5303181b2f5a59c87de9",
+      "bytes": 11065
     },
     {
       "file": "companion-agent/src/user-model/probe/select-facets.ts",
-      "sha256": "c4f410d9fbc5f01c90179a398fca33e201ca35202fe992927a342dcb06730091",
-      "bytes": 18956
+      "sha256": "d97e5cc68ecb7da5e11a1bb5eb624da26d60b243a300b51ca72c94f423a29bfa",
+      "bytes": 19618
     },
     {
       "file": "companion-agent/src/user-model/probe/selector.ts",
@@ -370,8 +385,8 @@
     },
     {
       "file": "companion-agent/src/user-model/probe/types.ts",
-      "sha256": "7381423b85f1c84acc10134cb3c5725734af3459d2a0e1a71004ec9170016b98",
-      "bytes": 6531
+      "sha256": "0c6fde21a47fa606968a5d0c7b26193ffc29b971d2209d5e981acc4cd23a9d72",
+      "bytes": 11077
     },
     {
       "file": "companion-agent/src/user-model/probe/util.ts",
@@ -700,8 +715,8 @@
     },
     {
       "file": "shared/src/memory/retrieval.ts",
-      "sha256": "b76bcf35ff9dd2cb6c663dbced4defaba7d68dd42317deac5a4110e18e31a984",
-      "bytes": 59072
+      "sha256": "4fac0b30f391eb72f2bad425ad4e71ad011c96cb0807e3f97cb9c9cf5fbd1a6d",
+      "bytes": 70271
     },
     {
       "file": "shared/src/memory/text-units.ts",
@@ -750,8 +765,8 @@
     },
     {
       "file": "shared/src/scene/director.ts",
-      "sha256": "05b8d7cc5826fc9ee820ca6110f5c9a615135cd77a8ff9a58fb13ea48c1b86ff",
-      "bytes": 31795
+      "sha256": "96d971686c0f7431fb1692539754a83452c3ddc002b09dacd03c74b2120e1dae",
+      "bytes": 37192
     },
     {
       "file": "shared/src/scene/emotion-scheduler.ts",

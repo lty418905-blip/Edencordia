@@ -98,7 +98,7 @@ export function planningCapacityLeftCore(state: ProbeState, ctx: TurnContext, cf
   return Math.max(0, capacityLeftCore(state, ctx, cfg,work) - state.pending.length);
 }
 
-function noteScheduledCore(state: ProbeState, ctx: TurnContext,work:ProbeWork): void {
+export function noteScheduledCore(state: ProbeState, ctx: TurnContext,work:ProbeWork): void {
   const { dayKey, weekKey } = ctx;
   nonnegative(ownValue(state.schedule.dayCounts,dayKey) ?? 0); nonnegative(ownValue(state.schedule.weekCounts,weekKey) ?? 0);
   Object.defineProperty(state.schedule.dayCounts,dayKey,{value:(ownValue(state.schedule.dayCounts,dayKey) ?? 0)+1,enumerable:true,writable:true,configurable:true});

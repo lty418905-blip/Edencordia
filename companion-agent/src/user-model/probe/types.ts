@@ -1,4 +1,4 @@
-import type {FacetGroup,ProbeMode,ContentFamily,ProbeIntention,RowForbid} from './facets.ts';
+import type {DayKey,FacetGroup,ProbeMode,ContentFamily,ProbeIntention,RowForbid} from './facets.ts';
 
 export const ARCHETYPES = [
   'routine_chat',              // 日常閒聊
@@ -22,6 +22,8 @@ export interface ProbeCandidate {
   preferredArchetypes:string[];contextAnchor:string|null;
   wordingConstraints:{bans:string[];maxChars:number};validUntilMs:number;createdAtMs:number;
   prescoreAttempts?:number;nextPrescoreAtMs?:number;
+  /** Moment in milliseconds at which the asking flow last proposed this candidate; absent until then. */
+  lastOfferedAtMs?: number;
 }
 export interface ActiveAnchor {
   anchorId: string;
@@ -118,6 +120,23 @@ export interface ProbeState {
   readyScores: ReadyScore[];
   awaitingAnswer: {
     candidateId: string; facetId: string; deliveredAtMs: number;
+    /**
+     * The members below are written by the asking flow when a delivery is registered. They are
+     * optional in the type so that the empty state stays valid; the asking flow refuses a waiting
+     * record that lacks any of them.
+     */
+    /** Group of the facet's registry row when the probe was proposed. */
+    group?: FacetGroup;
+    /** Content family the probe asks for. */
+    family?: ContentFamily;
+    /** Why the facet was chosen. */
+    intention?: ProbeIntention;
+    /** The neighbouring facet a discriminating probe tells apart, or null. */
+    discriminatesFrom?: string | null;
+    /** Research mark computed from the facet view when the probe was proposed. */
+    research?: ProbeResearchMark;
+    /** Identifier of her accepted message that carries the question. */
+    deliveryRef?: string;
   } | null;
   fingerprints: FingerprintEntry[];
   coverage: Partial<Record<FacetGroup, number>>;        // 該維度最近一次被覆蓋的時間戳
@@ -148,6 +167,95 @@ export interface ProbeState {
   };
   lastGaps: string[];
   lastPlanDayKey: string | null;
+  /** Ledger of the asking flow; absent or null means an empty ledger. */
+  flow?: ProbeFlowLedger | null;
+}
+
+/** Which sides of an open review a facet has when a probe about it is proposed; 'none' is an ordinary probe. */
+export type ProbeResearchMark = 'none' | 'after_negative' | 'after_positive' | 'both';
+
+/** Whether the one chance roll of a user turn has been made, and how it fell. */
+export type ChanceRoll = 'none' | 'passed' | 'failed';
+
+/**
+ * A proposal handed to the step that writes her reply, which decides whether the question fits now.
+ * Identifiers, closed-list values and numbers only: never a hint text, an anchor or a question.
+ */
+export interface ActiveOffer {
+  /** User turn in which the proposal was made. */
+  turnId: string;
+  candidateId: string;
+  facetId: string;
+  /** Group, mode and depth of the registry row at the moment of the proposal. */
+  group: FacetGroup;
+  mode: ProbeMode;
+  depth: 1 | 2 | 3;
+  /** Family, intention and neighbour as planned on the candidate. */
+  family: ContentFamily;
+  intention: ProbeIntention;
+  discriminatesFrom: string | null;
+  /** Research mark recomputed from the facet view at the moment of the proposal. */
+  research: ProbeResearchMark;
+  /** Index into the row's approach hints, or null when the row has none. */
+  approachIndex: number | null;
+  /** Moment of the proposal in milliseconds. */
+  offeredAtMs: number;
+}
+
+/**
+ * What became of one delivered probe. The elicitation mark is always 'probe': evidence about the
+ * listed facets in the settling user message was asked for and is never counted as spontaneous.
+ */
+export interface SettlementRecord {
+  /** User turn that settled the probe. */
+  turnId: string;
+  candidateId: string;
+  facetId: string;
+  group: FacetGroup;
+  family: ContentFamily;
+  intention: ProbeIntention;
+  discriminatesFrom: string | null;
+  research: ProbeResearchMark;
+  deliveryRef: string;
+  /** Moments in milliseconds: when her message was accepted, and when the user turn settled it. */
+  deliveredAtMs: number;
+  settledAtMs: number;
+  outcome: ProbeOutcome;
+  /** True when the waiting time ran out or the clock went backwards; the outcome is then 'unanswered'. */
+  timedOut: boolean;
+  elicitation: 'probe';
+  /** The probed facet, then the discriminated neighbour when there is one. */
+  elicitedFacetIds: string[];
+}
+
+/** What the asking flow remembers about the user turn it received last. */
+export interface FlowTurn {
+  turnId: string;
+  /** The user refused her asking in this turn, or named a facet he does not want to talk about. */
+  refusal: boolean;
+  /** This turn falls inside the pause that follows a settled probe. */
+  refractory: boolean;
+  /** The probe this turn settled, or null. */
+  settlement: SettlementRecord | null;
+  /** The chance roll is made at most once per turn, so that regenerating a reply cannot roll again. */
+  chanceRoll: ChanceRoll;
+}
+
+/** State owned by the asking flow, stored inside the probe state. */
+export interface ProbeFlowLedger {
+  turn: FlowTurn | null;
+  /** The proposal waiting for the report of what the reply step did with it, or null. */
+  offer: ActiveOffer | null;
+  /** Number of coming user messages without a probe; an integer from 0 to 10,000. */
+  refractoryLeft: number;
+  research: {
+    /** Delivered research probes per local week key. */
+    weekCounts: Record<string, number>;
+    /** Local day of the last delivered research probe per facet. */
+    lastProbeDayByFacet: Record<string, DayKey>;
+  };
+  /** Number of deliveries withdrawn before they were settled. */
+  withdrawn: number;
 }
 
 /** 宿主對追問意圖的處置 */

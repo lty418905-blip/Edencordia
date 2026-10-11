@@ -2,7 +2,8 @@ import {WORDING_BANS} from './itembank.ts';
 import {DEFAULT_SCHEDULE_CONFIG,checkScheduleConfig,scheduledCore,planningCapacityLeftCore,effectiveMinIntervalDaysCore,type ScheduleConfig} from './schedule.ts';
 import {allowedDepthCore} from './selector.ts';
 import {validateSelectCore,selectFacetsCore,type SelectInput} from './select-facets.ts';
-import {FACET_GROUPS,type FacetView,type PlanGates,type RegistryRow} from './facets.ts';
+import {FACET_GROUPS,UNIVERSAL_SITUATIONS,type FacetView,type PlanGates,type RegistryRow} from './facets.ts';
+import {containsName} from './guards.ts';
 import type {ActiveAnchor,ProbeState,ProbeCandidate,TurnContext} from './types.ts';
 import {boundedCopy,checkState,checkContext,checkedArray,checkedText,nonnegative,dataObject,ownValue,copyCore,newWork,limitsFor,PROBE_LIMITS,fail,reasonOf,type ProbeWork,type ProbeLimits,type ReasonCode} from './util.ts';
 import {foldForMatch} from '../../../../shared/src/common/script-fold.ts';
@@ -11,6 +12,9 @@ export interface PlannerConfig {maxCandidatesPerDay:number;candidateTtlMs:number
 export const DEFAULT_PLANNER_CONFIG:PlannerConfig=Object.freeze({maxCandidatesPerDay:2,candidateTtlMs:72*3600000,readyTtlMs:2*3600000,jitterFraction:0.15,schedule:Object.freeze({...DEFAULT_SCHEDULE_CONFIG})});
 export interface PlanOptions {state:ProbeState;registry:RegistryRow[];facets:FacetView[];gates:PlanGates;seed:string;anchors:ActiveAnchor[];ctx:TurnContext;candidateIds:string[];cfg?:PlannerConfig|null}
 export interface PlanResult {candidates:ProbeCandidate[];gaps:string[];resolved:string[];reasonCode:ReasonCode;work:ProbeWork}
+
+/** The research marks a pending candidate may carry; 'none' is an ordinary probe. */
+const PENDING_RESEARCH_MARKS = Object.freeze(['none', 'after_negative', 'after_positive', 'both'] as const);
 
 /** Input-dependent budgets apply to this call, never to the complete chat. */
 function rowCount(input:PlanOptions):number {
@@ -45,6 +49,15 @@ export function plan(input:PlanOptions):PlanResult {
     dataObject(input);const limits=limitsFor(rowCount(input));const x=boundedCopy(input,work,limits,true);dataObject(x);
     for(const key of ['state','registry','facets','gates','seed','anchors','ctx','candidateIds'] as const)if(x[key]===undefined)fail('missing_input');
     checkContext(x.ctx);checkState(x.state,work,limits);checkedText(x.seed,PROBE_LIMITS.key);
+    // A pending candidate without a research mark counts as an ordinary probe. A mark that is
+    // present must be one of the four known values: anything else would be counted against the
+    // weekly research ceiling without meaning anything, so the whole call is refused.
+    for (const candidate of x.state.pending) {
+      work.steps++;
+      if (candidate.research !== undefined && !containsName(PENDING_RESEARCH_MARKS, candidate.research)) {
+        fail('invalid_input');
+      }
+    }
     const cfg=x.cfg??{...DEFAULT_PLANNER_CONFIG,schedule:{...DEFAULT_SCHEDULE_CONFIG,forms:Math.min(DEFAULT_SCHEDULE_CONFIG.forms,limits.forms)}};checkPlannerConfig(cfg,x.ctx.nowMs,limits);
     for(const a of checkedArray(x.anchors,limits.list)){work.steps++;dataObject(a);checkedText(a.anchorId,PROBE_LIMITS.key);checkedText(a.kind,PROBE_LIMITS.key);checkedText(a.label,PROBE_LIMITS.quote);if(a.validUntilMs!=null)nonnegative(a.validUntilMs);}
     const ids=new Set<string>(),pendingIds=new Set(x.state.pending.map(c=>{work.steps++;return c.candidateId;}));
@@ -54,7 +67,7 @@ export function plan(input:PlanOptions):PlanResult {
     const validated=validateSelectCore(selection,work);if(!validated.ok)fail(validated.reason);const sel=validated.value;
     const state=x.state,now=x.ctx.nowMs;
     if(!x.gates.learningEnabled){state.pending=[];commit(input.state,state,work);return {candidates:[],gaps:[],resolved:[],reasonCode:null,work};}
-    if(x.gates.distressWindow || x.gates.situations.some(s=>{work.steps++;return ['same_day_conflict','user_wants_alone','deep_night','after_short_answer'].includes(s);}) || (x.ctx.archetypes??[]).includes('distress_moment'))return {candidates:[],gaps:[],resolved:[],reasonCode:null,work};
+    if(x.gates.distressWindow || x.gates.situations.some(s=>{work.steps++;return containsName(UNIVERSAL_SITUATIONS,s);}) || (x.ctx.archetypes??[]).includes('distress_moment'))return {candidates:[],gaps:[],resolved:[],reasonCode:null,work};
     state.pending=state.pending.filter(c=>{work.steps++;return c.validUntilMs>now;});state.readyScores=state.readyScores.filter(r=>{work.steps++;return now-r.scoredAtMs<=cfg.readyTtlMs;});
     const capacity=Math.min(cfg.maxCandidatesPerDay-state.pending.length,planningCapacityLeftCore(state,x.ctx,cfg.schedule,work));
     const pending=new Set(state.pending.map(c=>{work.steps++;return c.facetId;})),views=new Map(sel.facets.map(v=>{work.steps++;return [v.facetId,v] as const;}));

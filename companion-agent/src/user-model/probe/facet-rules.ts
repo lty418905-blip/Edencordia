@@ -16,7 +16,7 @@ import {
 } from './facets.ts';
 import { dayOnOrAfter, daysBetweenCore, isDayKey } from './day-keys.ts';
 import {snapshotCore,newWork,limitsFor,ownValue,type ProbeWork} from './util.ts';
-import { ownArrayData, viewMemberValid, isNonNegativeInteger, isPlainData } from './guards.ts';
+import { ownArrayData, viewMemberValid, isNonNegativeInteger, isPlainData, containsName } from './guards.ts';
 
 
 /** Families of CONTENT_FAMILIES the row can open but the facet has no evidence for, in row.openingFamilies order. */
@@ -129,8 +129,16 @@ function gate(input: FacetGateInput, trusted: boolean): { eligible: true } | { e
 
     // 2. Licence.
     if (row.licence !== 'near_scale_cleared' && row.licence !== 'not_near_scale') return closed('licence');
-    // 3. Mode and opening families.
-    if (row.mode === 'observe_only' || openings.length === 0) return closed('mode');
+    // 3. Mode and opening families. Only the three modes in which she may ask pass; a mode
+    // outside them (observe-only, absent, unknown) and an opening family outside the closed list
+    // cannot be decided here, and a gate that cannot be decided is closed.
+    if (row.mode !== 'ask' && row.mode !== 'offer' && row.mode !== 'only_if_user_raises') return closed('mode');
+    if (openings.length === 0) return closed('mode');
+    // At most three members after registry validation; the loop is not counted as work so that
+    // the step count of the situation comparison below stays what callers measure.
+    for (let index = 0; index < openings.length; index++) {
+      if (!containsName(CONTENT_FAMILIES, openings[index])) return closed('mode');
+    }
     // 4. Declined must be exactly false.
     if (facet.declined !== false) return closed('declined');
     // 5. Cooling: undefined closes, null is not cooling, a valid day key is compared with today.
@@ -319,8 +327,16 @@ export function compareRanked(a: RankKey, b: RankKey): number {
   }
 }
 
-/** Core entry points take the already validated owned projection. */
+/**
+ * The gate of ONE facet: licence, mode, declined, cooling, review, the row's own forbids,
+ * prerequisites, and whether asking can add evidence. It does not contain the gates of a whole
+ * call: with learning switched off, inside the distress window or in a universal situation it
+ * still answers "eligible". It is therefore not the check before speaking; that check is
+ * offerProbe of the asking flow, which applies the call-level gates first and then this gate.
+ * Core entry points take the already validated owned projection.
+ */
 export function facetGateCore(input:FacetGateInput):ReturnType<typeof gate>{return gate(input,true);}
+/** Public form of the single-facet gate on untrusted input; see the note above: it is not the check before speaking. */
 export function facetGate(input:FacetGateInput):ReturnType<typeof gate>{
   try{if(!isPlainData(input))return {eligible:false,reason:'missing_view'};
     const work=newWork();work.snapshots++;

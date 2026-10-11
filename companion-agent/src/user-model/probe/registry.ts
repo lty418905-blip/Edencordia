@@ -150,7 +150,13 @@ function freezeArray<T>(values: T[]): T[] {
   return Object.freeze(values) as T[];
 }
 
-/** Validate one row and build a fresh, deeply frozen copy with only known members. */
+/**
+ * Validate one row and build a fresh, deeply frozen copy with only known members.
+ * The members are checked in this order, which is NOT the declared order of RegistryRow, and the
+ * first failing one supplies the reason: facetId, group, mode, depth, observationEntrance,
+ * licence, minGapDays, then the lists neighbours, openingFamilies, forbids, contextArchetypes,
+ * approachHints, sources and prerequisites, each by its length first and its members after.
+ */
 function validateRow(row: unknown,work:ProbeWork): { ok: true; row: RegistryRow } | RowFailure {
   work.nodes++;
   // Any accessor property on the row, even one with an unknown name, is rejected.

@@ -128,7 +128,16 @@ type ValidationResult = { ok: true; value: Validated } | { ok: false; reason: 'i
 const INVALID: { ok: false; reason: 'invalid_input' } = { ok: false, reason: 'invalid_input' };
 const LIMIT: { ok: false; reason: 'input_limit' } = { ok: false, reason: 'input_limit' };
 
-/** Step 1: check the whole input against the closed lists; any other value is invalid_input or input_limit. */
+/**
+ * Step 1: check the whole input against the closed lists; any other value is invalid_input or input_limit.
+ * Order: the members of the input in their declared order (registry, facets, gates, today, capacity,
+ * pendingResearch, groupLastCoveredMs, allowedDepth, blocked), a list's length before its members; the
+ * first failing check supplies the reason. Inside one facet view the order is NOT the declared one:
+ * facetId (type and emptiness, length, duplicate), band, declined, coolingEndsDay, then the length of
+ * familiesPresent and its members, distinctLocalDays, spontaneousCount, nextStep, review, and last
+ * the agreement of band and counters. Inside gates: learningEnabled, distressWindow, situations
+ * (length, then members), relationship, research.
+ */
 export function validateSelectCore(input: unknown,work:ProbeWork=newWork(),capture=false): ValidationResult {
   if (!isPlainData(input)) return INVALID;
   const record = input;
