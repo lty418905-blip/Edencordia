@@ -417,8 +417,8 @@ export class CompanionFlow {
       windowEndRolls:this.authority.companion.windowEndRolls(subject.subjectId,this.target(scope,characterId),5)};
   }
   contactEmotion(scope:SceneScope,characterId:string,nowMs:number,state=this.authority.state(scope),
-    currentReply:{sourceId:string;revision:number}|null=null){
-    return this.authority.contactEmotionProjection(scope,characterId,nowMs,state,currentReply);
+    currentReply:{sourceId:string;revision:number}|null=null,timeline?:SceneSource[]){
+    return this.authority.contactEmotionProjection(scope,characterId,nowMs,state,currentReply,timeline);
   }
   /**
    * The projected (relieved) connection frustration and the unexplained unanswered episode, if any. The pressure model does
@@ -663,70 +663,122 @@ export class CompanionFlow {
    * The judged context: retrieval, strategy, the decision task, the quiet-exception candidate and, for the local judgment,
    * the bounded contact context with its summary (the only host job before the decision besides the candidate).
    */
-  private async prepareContext(scope:SceneScope,characterId:string,configs:Configurations,assertCurrent:()=>void,
-    gate:ContactGate,path:ContactPath){
-    const {actor,subject,state,now,targetId}=gate,companion=this.authority.companion;
-    const {opportunity,exceptionPath,windowEndNow,windowEnd,judged,invitation}=path,fingerprint=this.judgmentFingerprint(gate,opportunity);
-    const contactEmotion=this.contactEmotion(scope,characterId,now,state);
-    const priorAddress=state.sources.filter(source=>source.status==='accepted'&&source.envelope.targetId===characterId).at(-1);
-    const context=await this.core.contextFrom(this.authority.snapshot(scope,characterId,state),exceptionPath?'此刻适合表达思念的真实共同经历':
-      windowEndNow?WINDOW_END_FRAMING[windowEnd?.tone??'care'].query:opportunity.topic,configs,
-      contactEmotion.emotion,this.authority.preferences(scope,characterId,state),assertCurrent,now,
-      sceneExpressionOptions(this.authority,scope,characterId,
-        priorAddress?.envelope??{targetId:characterId,mode:'direct',presentIds:[characterId]},state,
-        contactEmotion.emotion,now,contactEmotion.affect));
-    context.context+=this.authority.worldContext(scope,characterId,state);
-    context.context+=this.authority.commitments.projectPersistent(scope,{characterId,purpose:'expression',mode:'companion'}).systemText;
+  private async prepareContext(
+    scope: SceneScope,
+    characterId: string,
+    configs: Configurations,
+    assertCurrent: () => void,
+    gate: ContactGate,
+    path: ContactPath,
+  ) {
+    const {actor, subject, state, now, targetId} = gate;
+    const companion = this.authority.companion;
+    const {opportunity, exceptionPath, windowEndNow, windowEnd, judged, invitation} = path;
+    const fingerprint = this.judgmentFingerprint(gate, opportunity);
+    const contactEmotion = this.contactEmotion(scope, characterId, now, state);
+    const priorAddress = state.sources
+      .filter(source => source.status === 'accepted' && source.envelope.targetId === characterId)
+      .at(-1);
+    const query = exceptionPath
+      ? '此刻适合表达思念的真实共同经历'
+      : windowEndNow ? WINDOW_END_FRAMING[windowEnd?.tone ?? 'care'].query : opportunity.topic;
+    const context = await this.core.contextFrom(
+      this.authority.snapshot(scope, characterId, state),
+      query,
+      configs,
+      contactEmotion.emotion,
+      this.authority.preferences(scope, characterId, state),
+      assertCurrent,
+      now,
+      sceneExpressionOptions(
+        this.authority,
+        scope,
+        characterId,
+        priorAddress?.envelope ?? {targetId: characterId, mode: 'direct', presentIds: [characterId]},
+        state,
+        contactEmotion.emotion,
+        now,
+        contactEmotion.affect,
+      ),
+    );
+    context.context += this.authority.worldContext(scope, characterId, state);
+    context.context += this.authority.commitments.projectPersistent(scope, {
+      characterId, purpose: 'expression', mode: 'companion',
+    }).systemText;
+
     // Turning off personalization must not prevent an independently enabled greeting.
-    const strategy=await this.strategy(scope,characterId,context.context,configs,assertCurrent,'proactive')??this.basicStrategy(subject.subjectId,opportunity.purpose);
-    const activity=companion.activity(subject.subjectId);
-    const task=companionDecisionPrompt(opportunity,strategy,{nowMs:now,unansweredCount:activity.unansweredCount,
-      busyUntilMs:activity.busyUntilMs,lastUserActivityAtMs:activity.lastUserActivityAtMs});
-    const assessmentInput=this.authority.relationshipAssessmentInput(scope,characterId);
-    const assessment=assessmentInput?this.authority.relationshipAssessments.read(assessmentInput):null;
-    const correctedChoice=assessment?.contactCorrected?assessment.contactChoice:null;
-    const quietCandidate=exceptionPath?await this.quietExceptionCandidate(actor,context.context,strategy,configs,now):null;
-    const personalKey=this.learningScope(scope,characterId);
-    let detail:ContactContext|null=null;
-    if(judged&&this.decisionProvider&&subject.host==='agent'){
-      if(!this.decisionProvider.summarizeContact)throw new Error('contact_summary_provider_required');
-      const sources=contactSources(state.sources,characterId,now);
-      // The judged context is bounded (a persona digest, the newest direct sources that fit the summary input, at most
-      // CONTACT_SOURCE_REF_LIMIT cited refs). What can never be left out (the contact windows) is checked before any summary
-      // job runs; if it, or the finished context, does not fit, the opportunity waits an hour (one diagnostic row per
-      // target, cleared after seven days) instead of rejecting the poll or rerunning the summary job on every poll.
-      const tooLarge=()=>{
-        companion.recordPollDiagnostic(subject.subjectId,targetId,'contact_context_too_large',
-          {stage:'contact_context',code:'contact_context_too_large'},now);
-        const deferred=this.deferOpportunity(opportunity,state.version,(opportunity.pressure?gridFloor(now):now)+HOUR,
-          'contact_context_too_large',fingerprint);
-        return {result:deferred.status==='deferred'?{status:'waiting',reason:'contact_context_too_large',nextCheckAtMs:deferred.nextCheckAtMs}:deferred};
+    const strategy = await this.strategy(scope, characterId, context.context, configs, assertCurrent, 'proactive')
+      ?? this.basicStrategy(subject.subjectId, opportunity.purpose);
+    const activity = companion.activity(subject.subjectId);
+    const task = companionDecisionPrompt(opportunity, strategy, {
+      nowMs: now,
+      unansweredCount: activity.unansweredCount,
+      busyUntilMs: activity.busyUntilMs,
+      lastUserActivityAtMs: activity.lastUserActivityAtMs,
+    });
+    const assessmentInput = this.authority.relationshipAssessmentInput(scope, characterId);
+    const assessment = assessmentInput ? this.authority.relationshipAssessments.read(assessmentInput) : null;
+    const correctedChoice = assessment?.contactCorrected ? assessment.contactChoice : null;
+    const quietCandidate = exceptionPath
+      ? await this.quietExceptionCandidate(actor, context.context, strategy, configs, now)
+      : null;
+    const personalKey = this.learningScope(scope, characterId);
+    let detail: ContactContext | null = null;
+
+    if (judged && this.decisionProvider && subject.host === 'agent') {
+      if (!this.decisionProvider.summarizeContact) throw new Error('contact_summary_provider_required');
+      const sources = contactSources(state.sources, characterId, now);
+      // Required windows are checked before summary work; an oversized context defers this opportunity.
+      const tooLarge = () => {
+        companion.recordPollDiagnostic(subject.subjectId, targetId, 'contact_context_too_large', {
+          stage: 'contact_context', code: 'contact_context_too_large',
+        }, now);
+        const deferred = this.deferOpportunity(
+          opportunity,
+          state.version,
+          (opportunity.pressure ? gridFloor(now) : now) + HOUR,
+          'contact_context_too_large',
+          fingerprint,
+        );
+        return {result: deferred.status === 'deferred' ? {
+          status: 'waiting', reason: 'contact_context_too_large', nextCheckAtMs: deferred.nextCheckAtMs,
+        } : deferred};
       };
-      // Same reading rules as the reply strategy (real-user entries past the same evidence threshold); guesses reach the
-      // judgment marked uncertain by contactContext, never as facts.
-      const entries=this.authority.userModel.listEntries(subject.subjectId,{purpose:'proactive',taskPurpose:'proactive',
-        characterId,sessionId:scope.sessionId,nowMs:now});
-      const commitments=this.authority.commitments.list(scope,{readerId:characterId,status:'active',mode:'companion'});
-      const currentEmotion=JSON.stringify(compactOpenHerForContact(contactEmotion.emotion));
-      const preset=this.authority.presets.status(scope);
-      const fixed={sources,nowMs:now,commitments,
-        persona:contactPersonaDigest(actor.persona,preset?.status==='ready'&&preset.characterId===characterId?preset.preset:null),
-        emotion:currentEmotion,timeZone:this.authority.interactions.clock(scope).timeZone??'UTC',affect:contactEmotion.affect,
-        ...(invitation?{contactState:{invitation:true}}:{})};
-      if(!contactContextFits(fixed))return tooLarge();
-      try{
-        const summary=sources.length?await (async()=>{
-          const summaryTask=contactSummaryTask(sources,now);
-          const raw=await this.decisionProvider!.summarizeContact!(summaryTask.messages);assertCurrent();
-          return decodeContactSummary(raw,summaryTask.sources);
-        })():{summary:'无近期互动',sources:[]};
-        detail=contactContext({...fixed,summary,entries});
-      }catch(error){
-        if(!(error instanceof Error)||error.message!=='contact_context_too_large')throw error;
+      // Use the reply strategy's real-user evidence threshold; guesses remain explicitly uncertain.
+      const entries = this.authority.userModel.listEntries(subject.subjectId, {
+        purpose: 'proactive', taskPurpose: 'proactive', characterId, sessionId: scope.sessionId, nowMs: now,
+      });
+      const commitments = this.authority.commitments.list(scope, {
+        readerId: characterId, status: 'active', mode: 'companion',
+      });
+      const currentEmotion = JSON.stringify(compactOpenHerForContact(contactEmotion.emotion));
+      const preset = this.authority.presets.status(scope);
+      const fixed = {
+        sources,
+        nowMs: now,
+        commitments,
+        persona: contactPersonaDigest(actor.persona,
+          preset?.status === 'ready' && preset.characterId === characterId ? preset.preset : null),
+        emotion: currentEmotion,
+        timeZone: this.authority.interactions.clock(scope).timeZone ?? 'UTC',
+        affect: contactEmotion.affect,
+        ...(invitation ? {contactState: {invitation: true}} : {}),
+      };
+      if (!contactContextFits(fixed)) return tooLarge();
+      try {
+        const summary = sources.length ? await (async () => {
+          const summaryTask = contactSummaryTask(sources, now);
+          const raw = await this.decisionProvider!.summarizeContact!(summaryTask.messages);
+          assertCurrent();
+          return decodeContactSummary(raw, summaryTask.sources);
+        })() : {summary: '无近期互动', sources: []};
+        detail = contactContext({...fixed, summary, entries});
+      } catch (error) {
+        if (!(error instanceof Error) || error.message !== 'contact_context_too_large') throw error;
         return tooLarge();
       }
     }
-    return {context,strategy,task,assessment,correctedChoice,quietCandidate,personalKey,detail};
+    return {context, strategy, task, assessment, correctedChoice, quietCandidate, personalKey, detail};
   }
   /** Decide: the local judgment (and the quiet-exception judgment), the user's boundary, or the host-model decision. */
   private async decide(scope:SceneScope,characterId:string,configs:Configurations,assertCurrent:()=>void,
