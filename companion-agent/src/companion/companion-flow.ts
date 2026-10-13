@@ -280,118 +280,213 @@ export class CompanionFlow {
    * Supplying `diagnostics` opts into reply degradation: invalid host output for the strategy is retried once and
    * then omitted, and an invalid relationship extraction falls back to the stored assessment for the current
    * sources, or is omitted when there is none. Each such
-   * event is appended to `diagnostics`; every other error propagates unchanged.
+   * event is appended to `diagnostics`; every other error reaching this method propagates unchanged.
+   * A supplied UTC millisecond instant fixes time-dependent assessment inputs, while each derivation still reads
+   * current authority state. Omission or null leaves each derivation on its own default clock.
    */
-  private async strategyWithAssessment(scope:SceneScope,characterId:string,currentContext:string,configs:Configurations,
-    assertCurrent:()=>void,purpose='reply',diagnostics?:ReplyDiagnostic[]):Promise<{strategy:FrontendStrategy|null;assessment?:RelationshipAssessment|null}>{
-    const subject=this.authority.subject(scope);if(!subject||subject.host!=='agent'||this.authority.interactions.modeOf(scope)!=='companion')return {strategy:null};
-    const target=this.target(scope,characterId);
-    const assessment=await this.replyAssessment(scope,characterId,diagnostics);assertCurrent();
-    if(assessment)currentContext+='\n'+formatRelationshipGuidance(assessment,purpose==='proactive'?'proactive':'reply');
-    const activity=summarizeUserActivity(this.authority.state(scope).sources.filter(source=>source.envelope.mode==='direct'&&
-      source.envelope.targetId===characterId&&source.envelope.presentIds.length===1&&source.envelope.presentIds[0]===characterId)
-      .map(source=>({id:source.id,revision:source.revision,role:source.role,status:source.status,acceptedAtMs:source.acceptedAtMs})),
-      {timeZone:this.authority.interactions.clock(scope).timeZone??'UTC'});
-    const task=this.authority.userModel.strategyTask(subject.subjectId,{purpose,storageKey:JSON.stringify(['xldb-user-model-strategy-v1',purpose,target]),
-      currentContext,characterId,sessionId:scope.sessionId,advanced:true,activity});
-    if(!task)return {strategy:null,assessment};
-    const run=async()=>{
-      const raw=await this.models.structuredTask(configs.strategy,task.messages);assertCurrent();
-      return this.authority.userModel.saveStrategy(subject.subjectId,task,decodeCommunicationStrategy(raw,task));
+  private async strategyWithAssessment(
+    scope: SceneScope,
+    characterId: string,
+    currentContext: string,
+    configs: Configurations,
+    assertCurrent: () => void,
+    purpose = 'reply',
+    diagnostics?: ReplyDiagnostic[],
+    nowMs?: number | null
+  ): Promise<{strategy: FrontendStrategy | null; assessment?: RelationshipAssessment | null}> {
+    const subject = this.authority.subject(scope);
+    if (!subject || subject.host !== 'agent' || this.authority.interactions.modeOf(scope) !== 'companion')
+      return {strategy: null};
+
+    const target = this.target(scope, characterId);
+    const assessment = await this.replyAssessment(scope, characterId, diagnostics, nowMs);
+    assertCurrent();
+    if (assessment)
+      currentContext += '\n' + formatRelationshipGuidance(assessment, purpose === 'proactive' ? 'proactive' : 'reply');
+
+    const activity = summarizeUserActivity(
+      this.authority.state(scope).sources.filter(source => source.envelope.mode === 'direct' &&
+        source.envelope.targetId === characterId && source.envelope.presentIds.length === 1 &&
+        source.envelope.presentIds[0] === characterId)
+        .map(source => ({
+          id: source.id,
+          revision: source.revision,
+          role: source.role,
+          status: source.status,
+          acceptedAtMs: source.acceptedAtMs
+        })),
+      {timeZone: this.authority.interactions.clock(scope).timeZone ?? 'UTC'}
+    );
+    const task = this.authority.userModel.strategyTask(subject.subjectId, {
+      purpose,
+      storageKey: JSON.stringify(['xldb-user-model-strategy-v1', purpose, target]),
+      currentContext,
+      characterId,
+      sessionId: scope.sessionId,
+      advanced: true,
+      activity
+    });
+    if (!task) return {strategy: null, assessment};
+
+    const run = async () => {
+      const raw = await this.models.structuredTask(configs.strategy, task.messages);
+      assertCurrent();
+      return this.authority.userModel.saveStrategy(subject.subjectId, task, decodeCommunicationStrategy(raw, task));
     };
-    if(!diagnostics)return {strategy:await run(),assessment};
-    let first:string;
-    try{return {strategy:await run(),assessment};}
-    catch(error){const code=hostOutputInvalid(error);if(!code)throw error;first=code;}
-    try{
-      const strategy=await run();
-      diagnostics.push({stage:'strategy',code:first,attempts:2,outcome:'recovered'});
-      return {strategy,assessment};
-    }catch(error){
-      const code=hostOutputInvalid(error);if(!code)throw error;
-      diagnostics.push({stage:'strategy',code,attempts:2,outcome:'omitted'});
-      return {strategy:null,assessment};
+    if (!diagnostics) return {strategy: await run(), assessment};
+
+    let first: string;
+    try {
+      return {strategy: await run(), assessment};
+    } catch (error) {
+      const code = hostOutputInvalid(error);
+      if (!code) throw error;
+      first = code;
+    }
+    try {
+      const strategy = await run();
+      diagnostics.push({stage: 'strategy', code: first, attempts: 2, outcome: 'recovered'});
+      return {strategy, assessment};
+    } catch (error) {
+      const code = hostOutputInvalid(error);
+      if (!code) throw error;
+      diagnostics.push({stage: 'strategy', code, attempts: 2, outcome: 'omitted'});
+      return {strategy: null, assessment};
     }
   }
   /** Reply-path assessment. Without a diagnostics sink it is exactly assessRelationship(). */
-  private async replyAssessment(scope:SceneScope,characterId:string,diagnostics?:ReplyDiagnostic[]):Promise<RelationshipAssessment|null>{
-    if(!diagnostics)return this.assessRelationship(scope,characterId);
-    try{return await this.assessRelationship(scope,characterId,diagnostics);}
-    catch(error){
-      const code=hostOutputInvalid(error);if(!code)throw error;
-      const input=this.authority.relationshipAssessmentInput(scope,characterId);
+  private async replyAssessment(
+    scope: SceneScope,
+    characterId: string,
+    diagnostics?: ReplyDiagnostic[],
+    nowMs?: number | null
+  ): Promise<RelationshipAssessment | null> {
+    if (!diagnostics) return this.assessRelationship(scope, characterId, undefined, nowMs);
+    try {
+      return await this.assessRelationship(scope, characterId, diagnostics, nowMs);
+    } catch (error) {
+      const code = hostOutputInvalid(error);
+      if (!code) throw error;
+      const input = this.authority.relationshipAssessmentInput(scope, characterId, nowMs ?? undefined);
       // Only the authority's stored view may stand in: it is keyed to the current sources, so deleted or rewritten
       // sources never reach the reply through an older in-process copy.
-      const cached=input?this.authority.relationshipAssessments.read(input):null;
-      diagnostics.push({stage:'relationship',code,attempts:1,outcome:cached?'cached':'omitted'});
+      const cached = input ? this.authority.relationshipAssessments.read(input) : null;
+      diagnostics.push({stage: 'relationship', code, attempts: 1, outcome: cached ? 'cached' : 'omitted'});
       return cached;
     }
   }
-  async systemContext(scope:SceneScope,characterId:string,legalContext:string,configs:Configurations,assertCurrent:()=>void,
-    currentUserSourceId?:string,nowMs=Date.now(),diagnostics?:ReplyDiagnostic[]){
-    if(diagnostics&&currentUserSourceId!==undefined){
-      const key=JSON.stringify([scopeKey(scope),currentUserSourceId]);
-      diagnostics.push(...this.profileDiagnostics.get(key)??[]);this.profileDiagnostics.delete(key);
+  /**
+   * Builds reply guidance at the received UTC millisecond instant; an omitted instant is sampled at entry.
+   * Each assessment read still observes current authority state. Infrastructure and context errors propagate.
+   */
+  async systemContext(
+    scope: SceneScope,
+    characterId: string,
+    legalContext: string,
+    configs: Configurations,
+    assertCurrent: () => void,
+    currentUserSourceId?: string,
+    nowMs = Date.now(),
+    diagnostics?: ReplyDiagnostic[]
+  ) {
+    if (diagnostics && currentUserSourceId !== undefined) {
+      const key = JSON.stringify([scopeKey(scope), currentUserSourceId]);
+      diagnostics.push(...this.profileDiagnostics.get(key) ?? []);
+      this.profileDiagnostics.delete(key);
     }
-    const reply=await this.strategyWithAssessment(scope,characterId,legalContext,configs,assertCurrent,'reply',diagnostics);
-    const strategy=reply.strategy;
-    const input=this.authority.relationshipAssessmentInput(scope,characterId);
+
+    const reply = await this.strategyWithAssessment(
+      scope, characterId, legalContext, configs, assertCurrent, 'reply', diagnostics, nowMs
+    );
+    const strategy = reply.strategy;
+    const input = this.authority.relationshipAssessmentInput(scope, characterId, nowMs ?? undefined);
     // A degraded reply keeps the assessment it actually used; otherwise read the current stored view.
-    const assessment=reply.assessment!==undefined&&diagnostics?.some(item=>item.stage==='relationship')?reply.assessment:
-      input?this.authority.relationshipAssessments.read(input):null;
-    const latest=this.authority.state(scope).sources.filter(source=>source.status==='accepted'&&source.processing==='ready').at(-1);
-    const harden=latest?.role==='user'&&latest.envelope.mode==='direct'&&latest.envelope.targetId===characterId&&
-      latest.analysis?.commitmentOperations?.some(operation=>operation.action==='harden');
-    const sleepHarden=latest?.role==='user'&&latest.envelope.mode==='direct'&&latest.envelope.targetId===characterId&&
-      this.sleepHardening(scope,characterId,nowMs)?.id===latest.id;
-    const subject=this.authority.subject(scope);
-    const agentCompanion=subject?.host==='agent'&&this.authority.interactions.modeOf(scope)==='companion';
-    const clock=agentCompanion?contactClock(nowMs,this.authority.interactions.clock(scope).timeZone??'UTC'):null;
+    const assessment = reply.assessment !== undefined && diagnostics?.some(item => item.stage === 'relationship')
+      ? reply.assessment : input ? this.authority.relationshipAssessments.read(input) : null;
+
+    const latest = this.authority.state(scope).sources
+      .filter(source => source.status === 'accepted' && source.processing === 'ready').at(-1);
+    const harden = latest?.role === 'user' && latest.envelope.mode === 'direct' &&
+      latest.envelope.targetId === characterId &&
+      latest.analysis?.commitmentOperations?.some(operation => operation.action === 'harden');
+    const sleepHarden = latest?.role === 'user' && latest.envelope.mode === 'direct' &&
+      latest.envelope.targetId === characterId && this.sleepHardening(scope, characterId, nowMs)?.id === latest.id;
+    const subject = this.authority.subject(scope);
+    const agentCompanion = subject?.host === 'agent' && this.authority.interactions.modeOf(scope) === 'companion';
+    const clock = agentCompanion
+      ? contactClock(nowMs, this.authority.interactions.clock(scope).timeZone ?? 'UTC') : null;
     return (clock?'\n当前伴侣现实时间：'+JSON.stringify(clock):'')+
       (strategy?'\n本轮沟通建议（依据已授权资料，推断不是事实；用户当前意愿是重要依据，角色保留自己的判断与不同意）：'+JSON.stringify(strategy):'')+
       (assessment?'\n'+formatRelationshipGuidance(assessment,'reply'):'')+
       (harden?'\n用户刚明确表示此前勿扰时段的破例联系让其不快。请按当前角色人设在本轮正常回复中真诚、简短道歉，承认已收到边界；不要主动补发道歉，也不要再把该承诺当作可破例。':
         sleepHarden?'\n用户刚明确表示此前睡眠时段的破例联系让其不快。请按当前角色人设在本轮正常回复中真诚、简短道歉，承认已收到边界；不要主动补发道歉，在用户再次发来消息前不再主动联系。':'');
   }
-  /** A supplied diagnostics sink records a stored extraction that no longer decoded and was extracted afresh. */
-  async assessRelationship(scope:SceneScope,characterId:string,diagnostics?:ReplyDiagnostic[]){
-    const learningKey=this.learningScope(scope,characterId);
-    if(learningKey&&this.decisionProvider?.identity)this.authority.personalLearning.contactFeedback(learningKey,
-      this.learningSources(scope,characterId),this.decisionProvider.identity());
-    const input=this.authority.relationshipAssessmentInput(scope,characterId);
-    if(!input)return null;
-    const task=this.authority.relationshipAssessments.task(input);
-    if(task&&input.sources.length&&this.decisionProvider){
-      if(!this.evidenceExtractor)throw new Error('relationship_evidence_extractor_required');
-      const key=JSON.stringify([scope,input.subjectId,characterId,task.sourceFingerprint]);
-      const running=this.relationshipInFlight.get(key);if(running)return running;
-      const work=(async()=>{
-        const extraction=this.authority.relationshipAssessments.reusableEvidence(input,
-          code=>diagnostics?.push({stage:'relationship',code,attempts:1,outcome:'reextracted'}))??await this.evidenceExtractor!(task);
-        if(learningKey){
-          const correction=this.authority.relationshipAssessments.read(input);
-          this.authority.personalLearning.relationship(learningKey,input,extraction,correction,()=>{
-              if(this.authority.state(scope).version!==input.sourceVersion||
-                this.authority.relationshipAssessments.read(input)?.revision!==correction?.revision||
-                this.learningScope(scope,characterId)!==learningKey||
-                this.authority.userModel.controls(input.subjectId).revision!==input.controlsRevision)
-                throw new Error('context_changed_retry');
-            });
+  /**
+   * Reads or evaluates the current scoped relationship. A supplied UTC millisecond instant fixes time only;
+   * null or omission leaves each derivation on its own default clock. Returns the stored row, or null when disabled,
+   * unavailable, or no row exists. Only an Error with message `context_changed_retry` thrown by save is absorbed:
+   * it returns the stored row for the current input, which may be null. That error from a missing second or third
+   * input or the learning callback, and all other errors, propagate unchanged.
+   * With diagnostics, unusable cached extraction appends one relationship entry with its invalid-output code,
+   * attempts: 1 and outcome: 'reextracted', before requesting fresh extraction.
+   */
+  async assessRelationship(
+    scope: SceneScope,
+    characterId: string,
+    diagnostics?: ReplyDiagnostic[],
+    nowMs?: number | null
+  ) {
+    const learningKey = this.learningScope(scope, characterId);
+    if (learningKey && this.decisionProvider?.identity) {
+      this.authority.personalLearning.contactFeedback(
+        learningKey, this.learningSources(scope, characterId), this.decisionProvider.identity()
+      );
+    }
+
+    const input = this.authority.relationshipAssessmentInput(scope, characterId, nowMs ?? undefined);
+    if (!input) return null;
+    const task = this.authority.relationshipAssessments.task(input);
+    if (task && input.sources.length && this.decisionProvider) {
+      if (!this.evidenceExtractor) throw new Error('relationship_evidence_extractor_required');
+      const key = JSON.stringify([scope, input.subjectId, characterId, task.sourceFingerprint]);
+      const running = this.relationshipInFlight.get(key);
+      if (running) return running;
+
+      const work = (async () => {
+        const extraction = this.authority.relationshipAssessments.reusableEvidence(
+          input, code => diagnostics?.push({stage: 'relationship', code, attempts: 1, outcome: 'reextracted'})
+        ) ?? await this.evidenceExtractor!(task);
+        if (learningKey) {
+          const correction = this.authority.relationshipAssessments.read(input);
+          this.authority.personalLearning.relationship(learningKey, input, extraction, correction, () => {
+            if (this.authority.state(scope).version !== input.sourceVersion ||
+              this.authority.relationshipAssessments.read(input)?.revision !== correction?.revision ||
+              this.learningScope(scope, characterId) !== learningKey ||
+              this.authority.userModel.controls(input.subjectId).revision !== input.controlsRevision)
+              throw new Error('context_changed_retry');
+          });
         }
-        const refreshed=this.authority.relationshipAssessmentInput(scope,characterId);
-        if(!refreshed)throw new Error('context_changed_retry');
-        const effectiveTask=this.authority.relationshipAssessments.task(refreshed)??task;
-        const result=await this.decisionProvider!.assess(effectiveTask,extraction,learningKey??undefined);
-        const current=this.authority.relationshipAssessmentInput(scope,characterId);
-        if(!current)throw new Error('context_changed_retry');
-        try{return this.authority.relationshipAssessments.save(effectiveTask,result,current);}
-        catch(error){
-          if(error instanceof Error&&error.message==='context_changed_retry')return this.authority.relationshipAssessments.read(current);
+
+        const refreshed = this.authority.relationshipAssessmentInput(scope, characterId, nowMs ?? undefined);
+        if (!refreshed) throw new Error('context_changed_retry');
+        const effectiveTask = this.authority.relationshipAssessments.task(refreshed) ?? task;
+        const result = await this.decisionProvider!.assess(effectiveTask, extraction, learningKey ?? undefined);
+        const current = this.authority.relationshipAssessmentInput(scope, characterId, nowMs ?? undefined);
+        if (!current) throw new Error('context_changed_retry');
+        try {
+          return this.authority.relationshipAssessments.save(effectiveTask, result, current);
+        } catch (error) {
+          if (error instanceof Error && error.message === 'context_changed_retry')
+            return this.authority.relationshipAssessments.read(current);
           throw error;
         }
       })();
-      this.relationshipInFlight.set(key,work);
-      try{return await work;}finally{if(this.relationshipInFlight.get(key)===work)this.relationshipInFlight.delete(key);}
+      this.relationshipInFlight.set(key, work);
+      try {
+        return await work;
+      } finally {
+        if (this.relationshipInFlight.get(key) === work) this.relationshipInFlight.delete(key);
+      }
     }
     return this.authority.relationshipAssessments.read(input);
   }

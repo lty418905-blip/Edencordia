@@ -175,8 +175,8 @@
     },
     {
       "file": "companion-agent/src/companion/companion-flow.ts",
-      "sha256": "34c0e719f00e7ecf92c571be12678af20c1e983ea49e58c8c9a5b43454fe2441",
-      "bytes": 125995
+      "sha256": "e17b53e64ebe00fefd4aad936e17bc5a5e01a0da6d39db593169f3f84b321c35",
+      "bytes": 128177
     },
     {
       "file": "companion-agent/src/companion/contact-context.ts",
@@ -824,9 +824,14 @@
       "bytes": 17809
     },
     {
+      "file": "shared/src/scene/ledger-runs.ts",
+      "sha256": "15fbe8620d02bacd008f8af16497ae690b2c9df49180f5cb8b314903d0ffb135",
+      "bytes": 10666
+    },
+    {
       "file": "shared/src/scene/ledger-stage-input.ts",
-      "sha256": "39b97eda329f4594544176c6e80c54a1dabf573b0ce0465b912c32e6c6cf1bdd",
-      "bytes": 30149
+      "sha256": "438501793ac8361ffb87ab1aac838609276a6759be8d9f1c9241bf67d255369d",
+      "bytes": 30241
     },
     {
       "file": "shared/src/scene/ledger-stage-tools.ts",
@@ -835,8 +840,8 @@
     },
     {
       "file": "shared/src/scene/ledger-stage.ts",
-      "sha256": "6391e5858083b2a997c522898fed134725ed3536083529cd606eabd49d75583e",
-      "bytes": 37932
+      "sha256": "5e9045e2644cc3ab0a4bc4424dc3c21327fa9b839ead43f440c8f226e931d71d",
+      "bytes": 38058
     },
     {
       "file": "shared/src/scene/lifecycle.ts",
@@ -855,8 +860,8 @@
     },
     {
       "file": "shared/src/scene/processing.ts",
-      "sha256": "61df4277ff1ac646412b56823a05464e697c42596dcba96fc724833dca37ea41",
-      "bytes": 16945
+      "sha256": "82dd3676f6076cfc12e925787091b2aa9c8e9acaac11d0e76375ad4c807c2d57",
+      "bytes": 16956
     },
     {
       "file": "shared/src/scene/provider-gate.ts",
@@ -875,8 +880,8 @@
     },
     {
       "file": "shared/src/scene/service.ts",
-      "sha256": "17ccc3430cb5d43d420741596c4eef270168c6ce0de123e3ce055d874fff3ddc",
-      "bytes": 135541
+      "sha256": "0df73622ac0b195efd2fbc94d4eb36d3f6a904ee03dd9ed0ad9cc6cb9dd6a98f",
+      "bytes": 151066
     },
     {
       "file": "shared/src/scene/store.ts",
