@@ -1,6 +1,10 @@
 import {randomUUID} from 'node:crypto';
+import {types} from 'node:util';
 import {Authority} from '../../../shared/src/core/store.ts';
 import {Core} from '../../../shared/src/core/service.ts';
+import {acceptedEmotionEvents} from '../../../shared/src/scene/store.ts';
+import {rosterOf} from '../../../shared/src/scene/perspective.ts';
+import {emotionSettingsEqual} from '../../../shared/src/emotion/openher.ts';
 import {ModelTasks} from '../../../shared/src/core/models.ts';
 import type {ModelRunner} from '../../../shared/src/core/models.ts';
 import {stages,scopeOf,text,scopeKey,configOf} from '../../../shared/src/core/types.ts';
@@ -272,10 +276,26 @@ export class AgentRuntime {
   
     });
   }
-  configure(scope:SceneScope,roster:unknown) {
-    return this.learningActivity(()=>{
-    this.assertOpen();return this.core.scene.configure(this.companionScope(scope),roster);
-  
+  /** Saves a companion roster atomically; learned or unfinished history locks existing actors' emotion settings. */
+  configure(scope: SceneScope, roster: unknown) {
+    return this.learningActivity(() => {
+      this.assertOpen();
+      return this.authority.scene.transaction(() => {
+        scope = this.companionScope(scope);
+        const next = rosterOf(roster);
+        return this.authority.scene.configure(scope, next, Date.now(), true, (state, incoming) => {
+          const accepted = acceptedEmotionEvents(this.authority.scene, scope, state);
+          const unfinished = state.sources.some(source => source.processing !== 'ready');
+          const previous = new Map(state.roster.characters.map(character => [character.id, character]));
+          for (const character of incoming.characters) {
+            const before = previous.get(character.id);
+            if (before && Object.hasOwn(accepted, character.id) && (unfinished || accepted[character.id])
+              && !emotionSettingsEqual(before.emotion, character.emotion)) {
+              throw new Error('scene_emotion_settings_locked');
+            }
+          }
+        });
+      });
     });
   }
   configureWorld(scope:SceneScope,settings:unknown) {
@@ -601,10 +621,32 @@ export class AgentRuntime {
   private requiredSubject(scope:SceneScope){const subject=this.authority.scene.subject(this.companionScope(scope));if(!subject)throw new Error('companion_subject_not_bound');return subject.subjectId;}
   exportTemplate(scope:SceneScope,name:string) { this.assertOpen();return this.authority.scene.transfer.exportTemplate(this.companionScope(scope),name); }
   previewTransfer(scope:SceneScope,document:unknown) { this.assertOpen();return this.authority.scene.transfer.preview(this.companionScope(scope),document); }
-  applyTransfer(scope:SceneScope,document:unknown,guard:{expectedVersion:number;previewId:string;operationId:string}) {
-    return this.learningActivity(()=>{
-    this.assertOpen();scope=this.companionScope(scope);const result=this.authority.scene.transfer.apply(scope,document,guard);this.invalidateCandidates(scope);return result;
-  
+  /** Applies a validated transfer atomically; template emotion edits use configure's pre-write lock. */
+  applyTransfer(scope: SceneScope, document: unknown, guard: {
+    expectedVersion: number;
+    previewId: string;
+    operationId: string;
+  }) {
+    return this.learningActivity(() => {
+      this.assertOpen();
+      const snapshot = transferDataSnapshot(document);
+      return this.authority.scene.transaction(() => {
+        scope = this.companionScope(scope);
+        const result = this.authority.scene.transfer.apply(scope, snapshot, guard, (state, next) => {
+          const accepted = acceptedEmotionEvents(this.authority.scene, scope, state);
+          const unfinished = state.sources.some(source => source.processing !== 'ready');
+          const previous = new Map(state.roster.characters.map(character => [character.id, character]));
+          for (const character of next.characters) {
+            const before = previous.get(character.id);
+            if (before && Object.hasOwn(accepted, character.id) && (unfinished || accepted[character.id])
+              && !emotionSettingsEqual(before.emotion, character.emotion)) {
+              throw new Error('scene_emotion_settings_locked');
+            }
+          }
+        });
+        this.invalidateCandidates(scope);
+        return result;
+      });
     });
   }
   deleteReference(scope:SceneScope,id:string,guard:SceneWriteGuard) {
@@ -982,6 +1024,37 @@ export class AgentRuntime {
     for(const [id,candidate] of this.candidates)if(scopeKey(candidate.scope)===key)this.candidates.delete(id);
     const job=this.background.get(key);if(job)job.obsolete=true;
   }
+}
+
+/** Copies O(document size) plain data by descriptor; accessors, proxies, cycles, and custom prototypes are rejected. */
+function transferDataSnapshot(value: unknown, ancestors = new WeakSet<object>()): unknown {
+  if (value === null || typeof value !== 'object') {
+    if (typeof value === 'function' || typeof value === 'symbol') {
+      throw new Error('invalid_scene_transfer_document');
+    }
+    return value;
+  }
+  if (types.isProxy(value) || ancestors.has(value)) throw new Error('invalid_scene_transfer_document');
+  const array = Array.isArray(value);
+  if (Object.getPrototypeOf(value) !== (array ? Array.prototype : Object.prototype)) {
+    throw new Error('invalid_scene_transfer_document');
+  }
+  const result: Record<string, unknown> | unknown[] = array ? [] : {};
+  ancestors.add(value);
+  try {
+    for (const key of Reflect.ownKeys(value)) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
+      if (typeof key !== 'string' || !Object.hasOwn(descriptor, 'value')) {
+        throw new Error('invalid_scene_transfer_document');
+      }
+      // Define data keys explicitly so an external __proto__ key cannot change the snapshot prototype.
+      const copied = transferDataSnapshot(descriptor.value, ancestors);
+      Object.defineProperty(result, key, {...descriptor, value: copied});
+    }
+  } finally {
+    ancestors.delete(value);
+  }
+  return result;
 }
 
 function sameAcceptedSource(source:ReturnType<Authority['scene']['state']>['sources'][number],message:SceneMessage):boolean {
