@@ -835,8 +835,8 @@
     },
     {
       "file": "shared/src/scene/ledger-runs.ts",
-      "sha256": "ce617137c273a7238fbe0159027c4e8c8b84943b570f20b949be5156cba34604",
-      "bytes": 13753
+      "sha256": "bbacfe4535ac32320e264df79108472e35c554cfe3db43c04e1c9f9d104fd4fe",
+      "bytes": 15154
     },
     {
       "file": "shared/src/scene/ledger-stage-input.ts",
@@ -890,13 +890,13 @@
     },
     {
       "file": "shared/src/scene/service.ts",
-      "sha256": "b2690c03062e1715c78ed05b14820453171fb3053405c9f0d4efd71b7f7b783e",
-      "bytes": 158678
+      "sha256": "65cdd9d44468690010fd6bc843f103740c41988bcce617315c18ae513bd42f44",
+      "bytes": 159046
     },
     {
       "file": "shared/src/scene/store.ts",
-      "sha256": "45f6043ceb3a7b9444660b2600a7cd17215dd119b942d592a79f95852eddd0f4",
-      "bytes": 131341
+      "sha256": "3922426083186a19640d563817fce7dd7dcd38a86a3f8be1067f18d93ee69d46",
+      "bytes": 135920
     },
     {
       "file": "shared/src/scene/story-clock-consumers.ts",
@@ -949,9 +949,14 @@
       "bytes": 7053
     },
     {
+      "file": "shared/src/scene/world-block-limit.ts",
+      "sha256": "cfe19764264a65effd849af64f8f0c62f5d7bdeda9326474bdae04c9ea723eee",
+      "bytes": 8879
+    },
+    {
       "file": "shared/src/scene/world-extraction.ts",
-      "sha256": "841f2d22347f4d3fe667e52b8706be13ececa5576493fe1b38b7b3c2b6abd1b8",
-      "bytes": 55358
+      "sha256": "90ecc36d604473b0d9472e2a319f6fa562d9a9aa6e56c6ece7a561fdea47f8ea",
+      "bytes": 56367
     },
     {
       "file": "shared/src/scene/world-ledger-store.ts",
