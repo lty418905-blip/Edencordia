@@ -435,8 +435,8 @@
     },
     {
       "file": "shared/docs/MAP.md",
-      "sha256": "0b2ca3ff36b060586d7e423da02da90ba55ae8b456f1ec506d613a7bc5f5a2e2",
-      "bytes": 6671
+      "sha256": "ce64b951769af3f1c468ea8bd2b692183cdf9466264514c9cb4caf2350703e8e",
+      "bytes": 7385
     },
     {
       "file": "shared/docs/OPENHER_ADOPTION.md",
@@ -505,8 +505,8 @@
     },
     {
       "file": "shared/src/common/geography.ts",
-      "sha256": "c375658b7a51b387b0dadc9b4fe08253e608e552c5f6ec7c37903e5dcb3cab8d",
-      "bytes": 77606
+      "sha256": "19ef6e0a8f74dc160d2c46b18373e0db7e87584fafacb32c4f88018eec6dae2b",
+      "bytes": 78781
     },
     {
       "file": "shared/src/common/han-script-exclusions.ts",
@@ -520,8 +520,8 @@
     },
     {
       "file": "shared/src/common/physiology.ts",
-      "sha256": "e2e88b0ae150a28f51579b6736d7577f7a20e08cd0c0d1125f315f13342dc893",
-      "bytes": 39846
+      "sha256": "1f4f6d4d8bf41316055b0aa731a558c58161d22c3c5b70a988014440fb77816e",
+      "bytes": 40762
     },
     {
       "file": "shared/src/common/script-fold-data.ts",
@@ -615,8 +615,8 @@
     },
     {
       "file": "shared/src/core/store.ts",
-      "sha256": "5292e8aa8c966e819bf1ea299ab55d15aff7ee91d45b2371262b09356da88775",
-      "bytes": 26477
+      "sha256": "77fd5e576da0a48190ae4f5460b9c2e6bb1a72bb9e25751f3c1c617d1b162638",
+      "bytes": 26924
     },
     {
       "file": "shared/src/core/tool-loop.ts",
@@ -845,13 +845,13 @@
     },
     {
       "file": "shared/src/scene/ledger-runs.ts",
-      "sha256": "bbacfe4535ac32320e264df79108472e35c554cfe3db43c04e1c9f9d104fd4fe",
-      "bytes": 15154
+      "sha256": "bc2b6c8c6d514144dab8b015bd9ec3c46dd52383bb395b08788384df113b7194",
+      "bytes": 15467
     },
     {
       "file": "shared/src/scene/ledger-stage-input.ts",
-      "sha256": "438501793ac8361ffb87ab1aac838609276a6759be8d9f1c9241bf67d255369d",
-      "bytes": 30241
+      "sha256": "742a5deb15bc3e1bee363e515f7dd67698d3e0e79835900c066a58df0a81c16e",
+      "bytes": 30399
     },
     {
       "file": "shared/src/scene/ledger-stage-tools.ts",
@@ -860,8 +860,8 @@
     },
     {
       "file": "shared/src/scene/ledger-stage.ts",
-      "sha256": "5e9045e2644cc3ab0a4bc4424dc3c21327fa9b839ead43f440c8f226e931d71d",
-      "bytes": 38058
+      "sha256": "654eb6eb918c104b8ad97026695b7229032d7b3244fe9ffa4ad16e8923f7c057",
+      "bytes": 39476
     },
     {
       "file": "shared/src/scene/lifecycle.ts",
@@ -880,8 +880,8 @@
     },
     {
       "file": "shared/src/scene/processing.ts",
-      "sha256": "82dd3676f6076cfc12e925787091b2aa9c8e9acaac11d0e76375ad4c807c2d57",
-      "bytes": 16956
+      "sha256": "dabbb646c982da310f2c032602f22669fa7d298274015da01e6c03d6ea2da30e",
+      "bytes": 17674
     },
     {
       "file": "shared/src/scene/provider-gate.ts",
@@ -900,13 +900,13 @@
     },
     {
       "file": "shared/src/scene/service.ts",
-      "sha256": "71daddb95a427782847a1758c31dc80a4ed7e1b7bf2b63736d9e288bd9342a5b",
-      "bytes": 160138
+      "sha256": "3d2c4774472c8fa3292131f1a707f1a4a921c37f9c7719c60af2dc0950c37f9f",
+      "bytes": 160801
     },
     {
       "file": "shared/src/scene/store.ts",
-      "sha256": "c37b959ba1bca100ba4eb5201d41789aaa886eeef7a0a78e77cf889a8c003748",
-      "bytes": 136590
+      "sha256": "02f5a03a8e09a3544ffa89e5fbae8ced8077103bfc082c1a6de666228a420a1a",
+      "bytes": 137114
     },
     {
       "file": "shared/src/scene/story-clock-consumers.ts",
@@ -975,8 +975,8 @@
     },
     {
       "file": "shared/src/scene/world-ledger.ts",
-      "sha256": "ea9548b5c7faab13dbf78ff6ad903d21c0acd1f972ce1e8cc44b4ed545d7704b",
-      "bytes": 221830
+      "sha256": "ec37357a08e98003c35a0c877915dad0073cf6fe5a15a74881d85fcdebb30634",
+      "bytes": 222521
     },
     {
       "file": "shared/src/scene/world-state.ts",
