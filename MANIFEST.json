@@ -5,8 +5,8 @@
   "files": [
     {
       "file": ".agents/skills/xldb-agent/SKILL.md",
-      "sha256": "512bcb89e872d24f72082d7e3bb83087154d9e9830f10eb1abf0f5b1d7f4d9c8",
-      "bytes": 21323
+      "sha256": "8b488941bb68d9426e40accb6665dd2238d42307beffdc6590dc6a9b5806863c",
+      "bytes": 21335
     },
     {
       "file": ".gitattributes",
@@ -20,7 +20,7 @@
     },
     {
       "file": "AGENTS.md",
-      "sha256": "c6f885dee14864d955297eae3f08c1a796e9200a97e953a3e6745fc106d663fc",
+      "sha256": "44c630a8359d9bc88c8f90c25a6c0315a25cb8f783e24427a7fc8066df470cec",
       "bytes": 1379
     },
     {
@@ -410,23 +410,23 @@
     },
     {
       "file": "INSTALL_AGENT.md",
-      "sha256": "2863d3760971a6bc992f92f9a64671a2bcfab55ab98697649c0f15fc1c757adb",
+      "sha256": "da217fa7793383f3505553d8d2d41009ea1e6fbb5c8ba2b6cae590dce8653c89",
       "bytes": 2914
     },
     {
       "file": "LICENSE.md",
-      "sha256": "c76057b4ecf744ddce64f4cb3791d6d08c054be0926dcb8066114401330944d4",
-      "bytes": 1817
+      "sha256": "85817cedca53f6806c14d43f144e2acbd6a62db6db20e3c1e2c19076c411d8bf",
+      "bytes": 1071
     },
     {
       "file": "package.json",
-      "sha256": "3c5303f7bbc2d8303bdd35064ae351539ef50f6d5a62d9521d57fec1df1ce740",
-      "bytes": 290
+      "sha256": "c0ef5252124dd67edada854c708cafd4ee836b7abc8a7c7d78a5f1cb3c151442",
+      "bytes": 268
     },
     {
       "file": "README.md",
-      "sha256": "cbcca98904dbc7e6176d57075bdb8ea9e767686e4c072288d445097efdd6f803",
-      "bytes": 14082
+      "sha256": "86d36f0b3266747dfa9b58de6568380f1b59d90bf9378aa9b2277e08c4a648fd",
+      "bytes": 14303
     },
     {
       "file": "shared/docs/ARITHMETIC.md",
@@ -1015,13 +1015,13 @@
     },
     {
       "file": "THIRD_PARTY_NOTICES.md",
-      "sha256": "4a861a02b3cd150b412811c208db2ef954c77bb247316ab2168704843210a42f",
-      "bytes": 11760
+      "sha256": "28ca01ade8fb75c8ede6b290f5ef417837eb7fc8643dc7480c67d11c8cd437b0",
+      "bytes": 11780
     },
     {
       "file": "tools/agent-assets.json",
-      "sha256": "425f8435197c570e9584f9d64cb807f607a53e4413d46443c0c66bfc03a8fc25",
-      "bytes": 2241
+      "sha256": "6725d52f884b406874b4c1326238bd07971306e4c1af920e1ae90b8b1f28d26b",
+      "bytes": 2247
     },
     {
       "file": "tools/backup.mjs",
@@ -1045,7 +1045,7 @@
     },
     {
       "file": "tools/setup.ps1",
-      "sha256": "e2fe01d1bc4045962f763d617ece7e347709fdda08d888628830f72cdf792ace",
+      "sha256": "c5b0786778a5207704d46f45be33ed13767a9635cf5cfe0ea0ba48d59506227a",
       "bytes": 441
     },
     {

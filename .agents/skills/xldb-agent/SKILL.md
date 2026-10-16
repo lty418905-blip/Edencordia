@@ -1,13 +1,13 @@
 ---
 name: xldb-agent
-description: Use XLDB memory and per-character emotion from any agent host (harness) that can run commands, spawn fresh-context subagents and read/write files, without SillyTavern. Keep the resident daemon ensured, dispatch queued background inference to fresh native subagents, and return only the selected character's filtered result.
+description: Use Edencordia memory and per-character emotion from any agent host (harness) that can run commands, spawn fresh-context subagents and read/write files, without SillyTavern. Keep the resident daemon ensured, dispatch queued background inference to fresh native subagents, and return only the selected character's filtered result.
 ---
 
-# XLDB Agent host
+# Edencordia Agent host
 
 If this package has just been supplied as an archive, follow the root `INSTALL_AGENT.md` and run `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tools/setup.ps1 -Mode Agent` from the extracted root first. This affects only the installer process, not the machine policy. Use the installation receipt's Node executable when Node is bundled under `.local/node`; do not assume it is on PATH. Installation does not require SillyTavern, an HTTP server or model API credentials. Continue below only for authorized interactions after the local installation check succeeds.
 
-Use for an authorized XLDB Agent interaction, accepted-event sync, or recall. This is a product host adapter, not the XLDB development reviewer workflow. Read [Agent interface](../../../companion-agent/docs/AGENT.md) for request fields and lifecycle.
+Use for an authorized Edencordia interaction, accepted-event sync, or recall. This is a product host adapter, not the XLDB development reviewer workflow. Read [Agent interface](../../../companion-agent/docs/AGENT.md) for request fields and lifecycle.
 
 After installation, first directly ask the user to create `.local/agent/retrieval-api.txt` in this workspace and fill the embedding and reranker API URLs, keys and model names using the JSON template in INSTALL_AGENT.md. Do not ask them to send keys in chat. Reuse an existing authorized file; CLI automatically reads this default path. An explicit `retrievalConfigPath` remains supported. If the user explicitly postpones configuration, continue local BM25. Never pass credentials to workers or echo them in reports. Explain that configured services receive retrieval queries and permitted memory text.
 

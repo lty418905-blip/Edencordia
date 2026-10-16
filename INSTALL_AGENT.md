@@ -1,4 +1,4 @@
-# 安裝 XLDB Agent
+# 安裝 Edencordia
 
 當前處於 MVP 測試階段, 功能可能存在實際應用問題.
 

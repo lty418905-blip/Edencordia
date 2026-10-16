@@ -1,4 +1,4 @@
-# XLDB Agent 產品入口
+# Edencordia 產品入口
 
 先讀取 INSTALL_AGENT.md, 執行本地安裝, 再讀取 .agents/skills/xldb-agent/SKILL.md.
 安裝後首先要求使用者在當前工作區新建 `.local/agent/retrieval-api.txt`, 按模板填寫 embedding 和 reranker 的 API 地址, 金鑰及模型名. 已有設定則複用; 不要讓使用者在聊天中傳送金鑰, 也不要讀取金鑰並轉述給子代理.
