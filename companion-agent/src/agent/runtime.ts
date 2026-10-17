@@ -37,6 +37,8 @@ export type HostDelegate=(task:HostTask)=>Promise<string>;
 /** A decision provider that may report local availability (AgentJev does). Reporting only; flow semantics ignore it. */
 export type AvailabilityAwareDecisionProvider=CompanionDecisionProvider&{availability?():AgentJevAvailability};
 export interface AgentOptions {
+  /** Test-only engine selection forwarded to Authority; product callers omit it. */
+  emotionEngineRule?: 2 | 3;
   databasePath:string;
   indexPath:string;
   delegate:HostDelegate;
@@ -120,7 +122,11 @@ export class AgentRuntime {
     this.delegate=options.delegate;
     this.baseConfig=agentConfigurations(options.retrieval);
     this.retrieval=new Retrieval(options.indexPath);
-    this.authority=new Authority<CompanionSceneMembers>(options.databasePath,{sceneExtension:companionSceneExtension});
+    const emotionEngineRule = options.emotionEngineRule;
+    this.authority = new Authority<CompanionSceneMembers>(options.databasePath, {
+      sceneExtension: companionSceneExtension,
+      ...(emotionEngineRule === undefined ? {} : {emotionEngineRule}),
+    });
     this.presetRunner=async task=>{
       this.assertOpen();let output:string;
       try {output=await options.delegate({id:task.jobToken,stage:'companionPreset',kind:'background',messages:structuredClone(task.messages),responseFormat:'json',isolation:'fresh-context'});}
