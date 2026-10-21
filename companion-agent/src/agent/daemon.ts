@@ -9,7 +9,6 @@ import {executeRun,operationClass,createRun,writeRunManifest,readRunManifest,req
 import {routedDelegate,type RunContext} from './run-context.ts';
 import {DaemonEvents} from './daemon-events.ts';
 import {acquireAuthorityLease,type AuthorityLease} from '../../../shared/src/scene/backup.ts';
-import {closeEmotionRanker} from '../../../shared/src/scene/emotion-scheduler.ts';
 import type {RetrievalConfig} from '../../../shared/src/memory/retrieval.ts';
 import {PROTOCOL,DRAIN_LIMIT_MS,SELF_IDENTITY_LIMIT_MS,daemonPaths,inboxFile,readJsonFile,writeJsonAtomic,pidAlive,validateRequest,selfCreatedAt,
   realDataDirectory,type DaemonReceipt,type InboxRequest,type RejectReason,type StopReason} from './daemon-protocol.ts';
@@ -301,8 +300,6 @@ export async function serve(options:ServeOptions):Promise<number> {
     while(busy()&&Date.now()<drainEnd)await sleep(50);
     const unclean=busy();
     step('drain',unclean?{unclean:true}:{});
-    closeEmotionRanker();
-    step('close_emotion_ranker');
     // The idle-learning worker is stopped inside runtime.close before the Authority closes; in D1 the daemon never
     // starts one (idleLearning:false), which the step records.
     const learningDisabled=runtime.backgroundStatus().learning.state==='disabled';

@@ -155,16 +155,8 @@ export class AgentRuntime {
       if(output.length>limit)throw new Error(limit>50000?'model_output_too_large':'model_invalid_response');
       return output;
     };
-    this.core=new Core(this.authority,this.retrieval,new ModelTasks(runner),{
-      sceneCompanion:(scene,core,models)=>new CompanionSceneFlow(scene,core,models),
-      // Roleplay schedule conflicts use this runtime's own AgentJev worker (closed by close()), never a second one.
-      sceneJudge:{
-        identity:()=>this.localJudge()?.identity()??'agentjev_unavailable',
-        evaluate:async payload=>{
-          const judge=this.localJudge();if(!judge)throw new Error('agentjev_unavailable');
-          this.relationshipInFlight++;try{return await judge.evaluate(payload);}finally{this.relationshipInFlight--;}
-        },
-      },
+    this.core = new Core(this.authority, this.retrieval, new ModelTasks(runner), {
+      sceneCompanion: (scene, core, models) => new CompanionSceneFlow(scene, core, models),
     });
     // Stage-named configs keep single dispatches addressable; the scene may pass a batching runner instead.
     this.core.scene.companion.responseExpectationExtractor=(messages,run=runner)=>
@@ -942,8 +934,6 @@ export class AgentRuntime {
     return place;
   }
   private assertOpen(){if(this.closed)throw new Error('agent_runtime_closed');}
-  /** The bundled AgentJev client, when that is the relationship provider (a custom or disabled provider has no judge). */
-  private localJudge():AgentJevClient|null {return this.relationshipProvider instanceof AgentJevClient?this.relationshipProvider:null;}
   private learningActivity<T>(work:()=>T):T {
     this.assertOpen();const finish=this.learningIdle.begin();
     try{
