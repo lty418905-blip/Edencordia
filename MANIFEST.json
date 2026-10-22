@@ -1000,18 +1000,18 @@
     },
     {
       "file": "shared/src/scene/tavern-engine/codec.ts",
-      "sha256": "0c9f166becd3c374a89573072afb91de0f8193de92b3147759cdaa89835ee4fc",
-      "bytes": 24198
+      "sha256": "baa2e623283194e2194907026c86194c1f8b07eaaa5861a00cf9c684ff653311",
+      "bytes": 30776
     },
     {
       "file": "shared/src/scene/tavern-engine/engine.ts",
-      "sha256": "f830d6de3567d216a66e3452f03c4c3b3803ee0bb61068e3786081cfb3978756",
-      "bytes": 39525
+      "sha256": "b632cadfb870da19b5762877943383a489adaf3cd75760062b0a64a4b3233297",
+      "bytes": 47030
     },
     {
       "file": "shared/src/scene/tavern-engine/model-input.ts",
-      "sha256": "6f4f065fff5521313814643b36b0f27b7e4b4f5223bd0d1d409278dc65c5adde",
-      "bytes": 12417
+      "sha256": "87597b7ec73a3c4081333eca09f6624a23ee46bd02ba51f0b445f93f88e4b205",
+      "bytes": 17865
     },
     {
       "file": "shared/src/scene/tavern-engine/perception.ts",
