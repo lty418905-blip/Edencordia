@@ -1000,13 +1000,18 @@
     },
     {
       "file": "shared/src/scene/tavern-engine/codec.ts",
-      "sha256": "44c861d04b9493fb6f89346acb9025a0fd38147d4153d9e1e8c4aa3ab1d1d043",
-      "bytes": 18899
+      "sha256": "0c9f166becd3c374a89573072afb91de0f8193de92b3147759cdaa89835ee4fc",
+      "bytes": 24198
     },
     {
       "file": "shared/src/scene/tavern-engine/engine.ts",
       "sha256": "f830d6de3567d216a66e3452f03c4c3b3803ee0bb61068e3786081cfb3978756",
       "bytes": 39525
+    },
+    {
+      "file": "shared/src/scene/tavern-engine/model-input.ts",
+      "sha256": "6f4f065fff5521313814643b36b0f27b7e4b4f5223bd0d1d409278dc65c5adde",
+      "bytes": 12417
     },
     {
       "file": "shared/src/scene/tavern-engine/perception.ts",
@@ -1017,6 +1022,11 @@
       "file": "shared/src/scene/tavern-engine/projection.ts",
       "sha256": "02e1c53f6f422c5d39ceac0ce543c87094be65b812935b7e7a28d1049f96f0a2",
       "bytes": 18511
+    },
+    {
+      "file": "shared/src/scene/tavern-engine/render.ts",
+      "sha256": "76b35c7b5d03773ceb03a3f03ac754c023d610a7535735f30e0030a7cb951f89",
+      "bytes": 16412
     },
     {
       "file": "shared/src/scene/tavern-engine/scheduler.ts",
