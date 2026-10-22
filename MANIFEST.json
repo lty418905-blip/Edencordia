@@ -1004,6 +1004,11 @@
       "bytes": 18899
     },
     {
+      "file": "shared/src/scene/tavern-engine/engine.ts",
+      "sha256": "f830d6de3567d216a66e3452f03c4c3b3803ee0bb61068e3786081cfb3978756",
+      "bytes": 39525
+    },
+    {
       "file": "shared/src/scene/tavern-engine/perception.ts",
       "sha256": "e892a06d31ba2f556929f6cd4ccba8d29c1dd24e8658e9beb28df9f7fbf66758",
       "bytes": 16663
