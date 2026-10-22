@@ -1025,8 +1025,8 @@
     },
     {
       "file": "shared/src/scene/tavern-engine/store.ts",
-      "sha256": "f955ec67c5fd35afbc09625f1a4ec3d445889f9dc9131afa13ffb829ef3ab471",
-      "bytes": 39468
+      "sha256": "c55ae74a0e60b68ba6019ea3e50c407faf6a998b02fc3a73530ed3b96a86f804",
+      "bytes": 54438
     },
     {
       "file": "shared/src/scene/tavern-engine/types.ts",
